@@ -1,23 +1,30 @@
 #!/usr/bin/bash
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 shopt -s extglob
 function main {
     if [ -e "Databases" ]
     then
         cd ./Databases
-        echo $'WELCOME TO OUR DBMS \n'
+        echo -e $"${BLUE}WELCOME TO OUR DBMS${NC}"
+        echo $'\n'
     else 
         mkdir Databases
         if [ -d "Databases" ]
         then
             cd ./Databases
-            echo $'WELCOME TO OUR DBMS \n'
+            echo -e $"${BLUE}WELCOME TO OUR DBMS${NC}"
+            echo $'\n'
         else
-            echo "There's a Problem, Please try again"
+            echo -e $"${RED}There's a Problem, Please try again${NC}"
             exit
         fi
     fi  
     echo $'Choose an Option: \n'
-    PS3="Main Select=# "
+    PS3="Main Menu=# "
     select option in 'Create Database' 'List Database' 'Connect to Database' 'Drop Database' 'Exit'
     do
         case $REPLY in 
@@ -42,14 +49,15 @@ function main {
             exitFromDB
             ;;
         *)
-            echo "You Enter Invalid Choice!!, Try Again"
+            echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}"
             PS3="Main Menu=# "
         esac
     done
 }
 
 function exitFromDB {
-    echo $'Good Bye, See You Again \n'
+    echo -e $"${BLUE}Good Bye, See You Again${NC}"
+    echo $'\n'
     exit
 }
 #*****************************************************************************#
@@ -61,23 +69,24 @@ function createDatabase {
     read -p "Enter The Databse Name: " DBName
     if [[ -e $DBName ]]
     then
-        echo "This Database Name Is Already Used"
+        echo -e $"${RED}This Database Name Is Already Used${NC}"
         echo "**********************************"
     else
         if [[ $DBName =~ ^[a-zA-Z][a-zA-Z_0-9]*$ ]]
         then
         mkdir $DBName
-        echo "Your Database Created Successfully !!!!!"
+        echo -e $"${GREEN}Your Database Created Successfully !!!!!${NC}"
         
     else
-        echo "Invalid Name !!!!!"
+        echo -e $"${RED}Invalid Name !!!!!${NC}"
     fi
 fi
 }
 
 # List Database
 function listDatabase {
-    echo $'Your Databases Are:\n'
+    echo -e $"${BLUE}Your Databases Are:${NC}"
+    echo $'\n'
     ls -F | grep '/' | sed 's|/||'
 }
 
@@ -131,14 +140,14 @@ function connectDatabase  {
                         exitFromDB
                         ;;
                     *)
-                        echo "You Enter Invalid Choice!!, Try Again"
+                        echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}"
                 esac
             done
         else
-            echo "Database Dosen't Exist!!"
+            echo -e $"${RED}Database Dosen't Exist!!${NC}"
         fi
     else
-        echo "Your Entered Invalid Database Name!!, Try Again"
+        echo -e $"${RED}Your Entered Invalid Database Name!!, Try Again${NC}"
     fi
 }
 
@@ -153,18 +162,18 @@ function dropDatabase {
             if [ $confirm == 'y' -o  $confirm == "Y" ]
             then
                 rm -r $DBName
-                echo "$DBName Database Deleted Successfully !!"
+                echo -e $"${GREEN}${DBName} Database Deleted Successfully !!${NC}"
             elif [ $confirm == 'n' -o $confirm == "N" ]
             then
-                echo "Thank You !!" 
+                echo -e $"${BLUE}Thank You !!${NC}" 
             else 
-                echo "You Enter Invalid Choice!!, Try Again" 
+                echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}" 
             fi
         else
-            echo "The Database Doesn't Exit!"
+            echo -e $"${RED}The Database Doesn't Exit!${NC}"
         fi
     else
-        echo "Your Entered Invalid Database Name!!, Try Again"
+        echo -e $"${RED}Your Entered Invalid Database Name!!, Try Again${NC}"
     fi
 }
 #*****************************************************************************#
@@ -177,7 +186,7 @@ function check_dataType {
     then
         if ! [[ $3 =~ ^[0-9]+$ ]]
         then
-            echo "You Entered Invalid value, Please Enter Integer value!!"
+            echo -e $"${RED}You Entered Invalid value, Please Enter Integer value!!${NC}"
             return 1
         else
             if [[ $2 -eq 1 ]]
@@ -189,7 +198,7 @@ function check_dataType {
     then 
         if ! [[ $3 =~ ^[a-zA-Z]+$ ]]
 		then
-			echo "You Entered Invalid value, Please Enter String value!!"
+			echo -e $"${RED}You Entered Invalid value, Please Enter String value!!${NC}"
 			return 1
 		else
             if [[ $2 -eq 1 ]]
@@ -204,7 +213,8 @@ function check_dataType {
 function check_primaryKey {
     if [[ `cut -d ':' -f1 $1 | awk '{if(NR != 1) print $0}' | grep -x -e $3` ]]
     then
-        echo $'\nPrimary Key Already Exists, No Duplicates Allowed!'
+        echo $'\n'
+        echo -e $"${RED}Primary Key Already Exists, No Duplicates Allowed!${NC}"
         return 1
     fi
 }
@@ -224,7 +234,7 @@ function createTable {
             read -p "How Many Columns You Want To Create? " fieldsNumber
             if [[ $fieldsNumber = +([1-9])*([0-9]) ]]
             then
-                echo -e "\033[0;32mNote That The First Element You Will Enter Will Be The Primary Key\033[0m"
+                echo -e $"${YELLOW}Note That The First Element You Will Enter Will Be The Primary Key${NC}"
                 for (( i=1; i<=$fieldsNumber; i++ ))
                 do
                     read -p "Enter The Name of The Field Number $i: " columnName
@@ -238,7 +248,7 @@ function createTable {
                         fi 
                         while [[ `head -1 $tableName` == *"-$columnName-"* ]]
                         do        
-                            echo "The Column Already Exist, Can't Make Duplicate Columns, Try Again!!"
+                            echo -e $"${RED}The Column Already Exist, Can't Make Duplicate Columns, Try Again!!${NC}"
                             read -p "Enter The Name of The Field Number $i Again: " columnName
                         done
                         echo -n "$columnName-" >> $tableName
@@ -252,7 +262,7 @@ function createTable {
                                     if [[ i -eq $fieldsNumber ]] 
                                     then
                                         echo $'\n' >> $tableName
-                                        echo "Table Created Successfully"
+                                        echo -e $"${GREEN}Table Created Successfully${NC}"
                                     else
                                         echo -n ":" >> $tableName
                                     fi
@@ -264,7 +274,7 @@ function createTable {
                                     if [[ i -eq $fieldsNumber ]] 
                                     then
                                         echo $'\n' >> $tableName
-                                        echo "Table Created Successfully"
+                                        echo -e $"${GREEN}Table Created Successfully${NC}"
                                     else
                                         echo -n ":" >> $tableName
                                     fi
@@ -272,35 +282,36 @@ function createTable {
                                     break
                                     ;;
                                 *)
-                                    echo "Invalid Choice!!, Try Again"
+                                    echo -e $"${RED}Invalid Choice!!, Try Again${NC}"
                             esac
 					    done
                     else
                         i=$(($i-1))
-                        echo "Invalid Column Name!!, Try Again"
+                        echo -e $"${RED}Invalid Column Name!!, Try Again${NC}"
                     fi
                 done
             else
                 if [[ $fieldsNumber -eq 0 ]]
                 then
-                    echo "Cannot Create A Table Without Columns"
+                    echo -e $"${RED}Cannot Create A Table Without Columns${NC}"
                 else
-                    echo "Invalid Entry"
+                    echo -e $"${RED}Invalid Entry${NC}"
                 fi
             fi
         else
-            echo "This Table Is Exsit!!, Please Enter Another Name."
+            echo -e $"${RED}This Table Is Exsit!!, Please Enter Another Name.${NC}"
             PS3="Main Menu=# "
         fi
     else
-        echo "Invalid Table Name!!, Try Again"
+        echo -e $"${RED}Invalid Table Name!!, Try Again${NC}"
     fi
 }
 
 # List Tables
 function listTables {
     PS3="Table Option=# "
-    echo $'Your Tables Are:\n'
+    echo -e $"${BLUE}Your Tables Are:${NC}"
+    echo $'\n'
     ls -F | grep -v '/'
 }
 
@@ -313,15 +324,15 @@ function dropTable {
         if [ $confirm == 'y' -o  $confirm == "Y" ]
             then
                 rm $tableName
-                echo "Table $tableName Deleted Successfully !!"
+                echo -e $"${GREEN}Table ${tableName} Deleted Successfully !!${NC}"
             elif [ $confirm == 'n' -o $confirm == "N" ]
             then
-                echo "Thank You !!" 
+                echo -e $"${BLUE}Thank You !!${NC}" 
             else 
-                echo "You Enter Invalid Choice!!, Try Again" 
+                echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}" 
         fi
     else
-        echo "The Table Doesn't Exit!"	
+        echo -e $"${RED}The Table Doesn't Exit!${NC}"	
 	fi
 }
 
@@ -332,7 +343,7 @@ function insertData {
     if [[ -f $tableName ]]
     then
         fieldsNumber=`head -1 $tableName | awk -F: '{print NF}'`
-        echo -e "\033[0;32mNote That The First Element You Will Enter Has Constrain Primary[Unique & Not Null]\033[0m"
+        echo -e $"${YELLOW}Note That The First Element You Will Enter Has Constrain Primary[Unique & Not Null${NC}"
         for (( i=1; i<=$fieldsNumber; i++ ))
         do
             fieldName=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $2}'`
@@ -346,14 +357,14 @@ function insertData {
                 if [[ i -eq $fieldsNumber ]] 
                 then
                     echo $'\n' >> $tableName
-		            echo "Successfully Insert Into Table $tableName"
+		            echo -e $"${GREEN}Successfully Insert Into Table ${tableName}${NC}"
                 else
                 echo -n ":" >> $tableName
                 fi
             fi
         done
     else
-        echo "The Table Doesn't Exit!"
+        echo -e $"${RED}The Table Doesn't Exit!${NC}"
     fi
 }
 
@@ -366,10 +377,11 @@ function selectData {
         do 
             case $REPLY in 
             1)
-                echo "------------------------------------------------------------"
+                echo -e $"${BLUE}------------------------------------------------------------"
                 head -1 $tableName | awk 'BEGIN{ RS = ":"; FS = "-" } {print $2}' | awk 'BEGIN{ORS="\t"} {print $0}'
                 echo -e "\n------------------------------------------------------------"
                 sed '1d' $tableName | awk -F: 'BEGIN{OFS="\t"} {for(i = 1; i <= NF; i++) $i=$i; print}'
+                echo -e $"${NC}"
                 PS3="Table Option=# "
                 break
                 ;;
@@ -379,21 +391,22 @@ function selectData {
                 do
                     fieldName=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $2}'`
                     fieldType=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $3}'`
-                    echo "\"$fieldName\" Of Type $fieldType"
+                    echo -e $"${BLUE}\"${fieldName}\" Of Type ${fieldType}${NC}"
                 done
                 read -p "Enter Column Name You Want To Select By It: " field
                 fieldNumber=`head -1 $tableName | awk 'BEGIN{ RS = ":"; FS = "-" } {print $2}' | grep -x -n $field | cut -d: -f1`
                 if [[ $fieldNumber == "" ]]
                 then
-                    echo "This Column Doesn't Exist"
-                    PS3="Table Option=# "
+                    echo -e $"${RED}This Column Doesn't Exist${NC}"
                 else
                     read -p "Enter Value for Specific Row: " value
-                    echo "------------------------------------------------------------"
+                    echo -e $"${BLUE}------------------------------------------------------------"
                     head -1 $tableName | awk 'BEGIN{ RS = ":"; FS = "-" } {print $2}' | awk 'BEGIN{ORS="\t"} {print $0}'
                     echo -e "\n------------------------------------------------------------"
                     sed '1d' $tableName | awk -F':' 'BEGIN{OFS="\t"} {if($('$fieldNumber')=="'$value'") {for(i = 1; i <= NF; i++) $i=$i; print}}'
+                    echo -e $"${NC}"
                 fi
+                PS3="Table Option=# "
                 break
                 ;;
             3)
@@ -402,29 +415,29 @@ function selectData {
                 do
                     fieldName=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $2}'`
                     fieldType=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $3}'`
-                    echo "\"$fieldName\" Of Type $fieldType"
+                    echo -e $"${BLUE}\"${fieldName}\" Of Type ${fieldType}${NC}"
                 done
                 read -p "Enter Column Name You Want To Select: " field
                 fieldNumber=`head -1 $tableName | awk 'BEGIN{ RS = ":"; FS = "-" } {print $2}' | grep -x -n $field | cut -d: -f1`
                 if [[ $fieldNumber == "" ]]
                 then
-                    echo "This Column Doesn't Exist"
-                    PS3="Table Option=# "
+                    echo -e $"${RED}This Column Doesn't Exist${NC}"
                 else
-                    echo "------------------------------------------------------------"
+                    echo -e $"${BLUE}------------------------------------------------------------"
                     head -1 $tableName | cut -d: -f$fieldNumber | awk -F "-" 'BEGIN{ORS="\t"} {print $2}'
                     echo -e "\n------------------------------------------------------------"
                     awk '{if(NR != 1) print $0}' $tableName | cut -d: -f$fieldNumber
+                    echo -e $"${NC}"
                 fi
+                PS3="Table Option=# "
                 break
                 ;;
             *)
-                PS3="Select Option=# "
-                echo "You Enter Invalid Choice!!, Try Again"
+                echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}"
             esac
         done
     else
-        echo "The Table Doesn't Exit!"   
+        echo -e $"${RED}The Table Doesn't Exit!${NC}"   
     fi
 }
 
@@ -441,16 +454,16 @@ function deleteData {
                     if [ $confirm == 'y' -o  $confirm == "Y" ]
                     then
                         sed -i '2,$d' $tableName
-                        echo "All Records Has Been Deleted Successfully"
+                        echo -e $"${GREEN}All Records Has Been Deleted Successfully${NC}"
                         PS3="Table Option=# "
                         break
                     elif [ $confirm == 'n' -o $confirm == "N" ]
                     then
-                        echo "Thank You !!"
+                        echo -e $"${BLUE}Thank You !!${NC}"
                         PS3="Table Option=# "
                         break 
-                    else 
-                        echo "You Enter Invalid Choice!!, Try Again" 
+                    else
+                        echo -e $"${RED}You Enter Invalid Choice!!, Try Again${NC}" 
                     fi
                     ;;
                 2)
@@ -461,24 +474,24 @@ function deleteData {
                     # -x => Exact , -e => Pattern , -n Record Number
                     if [[ $value == '' ]]
                     then
-                        echo "You Should Enter A Value"
+                        echo -e $"${RED}You Should Enter A Value${NC}"
                     elif [[ $recordNum == '' ]]
                     then
-                        echo "This Primary Key Doesn't Exist"
+                        echo -e $"${RED}This Primary Key Doesn't Exist${NC}"
                     else
                         recordNum=$(($recordNum+1)) # Grep Start From 0
                         sed -i ''$recordNum'd' $tableName
-                        echo "Record Deleted Successfully"
+                        echo -e $"${GREEN}Record Deleted Successfully${NC}"
                     fi
                     PS3="Table Option=# "
                     break
                     ;;
                 *) 
-                    echo "Invalid Choice!!, Try Again"
+                    echo -e $"${RED}Invalid Choice!!, Try Again${NC}"
             esac
         done
     else
-        echo "This Table Doen't Exist"
+        echo -e $"${RED}This Table Doen't Exist${NC}"
     fi
 }  
 
@@ -492,28 +505,28 @@ function updateData {
         recordNum=`cut -d ':' -f1 "$tableName" | awk '{if(NR != 1) print $0}' | grep -x -n -e "$value" | cut -d':' -f1`
         if [[ $value == '' ]]
         then
-            echo "You Should Enter A Value"
+            echo -e $"${RED}You Should Enter A Value${NC}"
         elif [[ $recordNum == '' ]]
         then
-            echo "This Primary Key Doesn't Exist"
+            echo -e $"${RED}This Primary Key Doesn't Exist${NC}"
         else
             recordNum=$(($recordNum+1))
             columnsNum=`head -1 "$tableName" | awk -F: '{print NF}'`
             echo "**********************************"
-            echo "Fields In This Record And Value of That Field"
+            echo -e $"${BLUE}Fields In This Record And Value of That Field${NC}"
             for (( i = 1; i <= columnsNum; i++ )) 
             do
                 fieldName=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $2}'`
                 fieldType=`head -1 $tableName | cut -d: -f$i | awk -F "-" '{print $3}'`
                 fieldValue=`sed -n ''$recordNum'p' $tableName | cut -d: -f$i`
-                echo "\"$fieldName\" Of Type $fieldType: $fieldValue"
+                echo -e $"${BLUE}\"${fieldName}\" Of Type ${fieldType}: ${fieldValue}${NC}"
 			done
             echo "**********************************"
             read -p "Enter Field Name You Want To Update: " field
             fieldNumber=`head -1 "$tableName" | awk 'BEGIN{ RS = ":"; FS = "-" } {print $2}' | grep -x -n "$field" | cut -d: -f1`
             if [[ $fieldNumber == "" ]]
             then
-                echo "This Column Doesn't Exist"
+                echo -e $"${RED}This Column Doesn't Exist${NC}"
                 PS3="Table Option=# "
             else
                 read -p "Enter New Value: " newValue
@@ -523,14 +536,14 @@ function updateData {
                     NR=`cut -d: -f1 "$tableName" | awk '{print $0}' | grep -x -n -e $value | cut -d: -f1`
                     oldValue=`awk 'BEGIN{FS=":"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$fieldNumber') print $i}}}' $tableName`
                     sed -i ''$NR's/'$oldValue'/'$newValue'/g' $tableName
-                    echo "Row Updated Successfully"
+                    echo -e $"${GREEN}Row Updated Successfully${NC}"
                     PS3="Table Option=# "
                 fi
             fi
         fi
     else
         PS3="Table Option=# "
-        echo "This Table Doesn't Exsit !!, Try Again"
+        echo -e $"${RED}This Table Doesn't Exsit !!, Try Again${NC}"
     fi
 }
 
